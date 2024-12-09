@@ -1,10 +1,10 @@
 import React from "react";
-import "./Professor.css";
+import "./Aluno.css";
 
-export default function Professor() {
+export default function Aluno() {
   return (
     <>
-      <div className="container-global-prof">
+      <div className="container-global-aluno">
         <div className="header">
           <div className="logo-publica">
             <img src="/MB.jpg"></img>
@@ -12,14 +12,13 @@ export default function Professor() {
           </div>
           <div className="logout">
             <img src="/user.svg"></img>
-            <span>Professor</span>
+            <span>Aluno</span>
             <img src="/logout.svg"></img>
           </div>
         </div>
-        <div className="container-prof">
+        <div className="container-aluno">
           <div className="principal-content">
             <h1>Publicações</h1>
-            <button>Nova Publicação</button>
           </div>
           <table className="tabela">
         <thead>
