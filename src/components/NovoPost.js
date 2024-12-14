@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; 
 import api from "../services/api";
 
 export default function NovoPost() {
@@ -7,6 +8,7 @@ export default function NovoPost() {
   const [disciplina, setDisciplina] = useState("");
   const [imagem, setImagem] = useState(null);
   const [message, setMessage] = useState(null);
+  const navigate = useNavigate(); 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,23 +31,31 @@ export default function NovoPost() {
       setDescricao("");
       setDisciplina("");
       setImagem(null);
+
+      navigate("/professor");
     } catch (error) {
       console.error("Erro ao criar publicação:", error);
       setMessage("Erro ao criar publicação. Verifique se o servidor está configurado corretamente.");
     }
   };
 
+  const handleVoltar = () => {
+    navigate("/professor");
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col items-center">
-      <header className="w-full bg-black text-white p-4 flex flex-wrap justify-between items-center">
-        <h1 className="text-xl font-bold">NEW POST</h1>
-        <div className="flex items-center gap-4 mt-2 md:mt-0">
-          <span className="font-medium">Eduardo Souza</span>
+      <header className="w-full bg-purple-600 text-white p-4 flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <h1 className="text-xl font-bold">Nova Postagem</h1>
+        </div>
+        <div className="flex items-center gap-2">
           <img
             src="/profile.png"
             alt="Avatar"
             className="w-8 h-8 rounded-full border border-gray-300"
           />
+          <span className="font-medium">Professor</span>
         </div>
       </header>
 
@@ -132,12 +142,21 @@ export default function NovoPost() {
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition"
-          >
-            Salvar
-          </button>
+          <div className="flex justify-between items-center">
+            <button
+              type="button"
+              onClick={handleVoltar}
+              className="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition"
+            >
+              Voltar
+            </button>
+            <button
+              type="submit"
+              className="bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition"
+            >
+              Publicar
+            </button>
+          </div>
         </form>
       </div>
     </div>
