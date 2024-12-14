@@ -1,42 +1,69 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import api from "../services/api";
 import Header from "./Header";
-import NovoPost from "./NovoPost";
 
 function ViewPosts() {
-    const post = {
-        title: "A Importância da Matemática",
-        disciplina: "Matemática",
-        image: "https://via.placeholder.com/300",
-        descricao: "A matemática está presente em todos os aspectos da nossa vida cotidiana.",
+  const { id } = useParams(); // Obtém o ID da publicação a partir da URL
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const response = await api.get(`/publicacoes/${id}`); // Busca a publicação pelo ID
+        setPost(response.data);
+      } catch (err) {
+        console.error("Erro ao buscar publicação:", err);
+        setError("Não foi possível carregar a publicação.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    return (
-        <>
-            <Header />
-            <div className="bg-gray-100 h-[100dvh]">
-                <NovoPost title="Publicação" />
-                <div>
-                    <h2 className="ml-24 mt-36 text-2xl font-bold text-gray-600">{post.title}</h2>
+    fetchPost();
+  }, [id]);
 
-                    <span className="inline-block ml-24 mt-4 px-4 py-2 text-sm font-medium text-white bg-violet-600 border border-violet-600 rounded-3xl">
-                        {post.disciplina}
-                    </span>
-                </div>
-                <div className="flex justify-center px-4 py-8 mt-10">
-                    <div className="bg-white shadow-md rounded-lg p-6 w-1/3 mb-6 mr-6">
-                        <img
-                            src={post.image}
-                            alt="Imagem da publicação"
-                            className="w-1/2 h-auto object-cover rounded-md"
-                        />
-                    </div>
-                    <div className="bg-white shadow-md rounded-lg p-6 w-1/3">
-                        <p className="text-black font-semibold">{post.descricao}</p>
-                    </div>
-                </div>
-            </div>
-        </>
-    );
+  if (loading) {
+    return <p>Carregando publicação...</p>;
+  }
+
+  if (error) {
+    return <p className="text-red-500 text-center">{error}</p>;
+  }
+
+  if (!post) {
+    return <p className="text-gray-600 text-center">Publicação não encontrada.</p>;
+  }
+
+  return (
+    <>
+      <Header />
+      <div className="bg-gray-100 min-h-screen">
+        <div className="p-6">
+          <h2 className="text-3xl font-bold text-gray-800">{post.titulo}</h2>
+
+          <span className="inline-block mt-2 px-4 py-2 text-sm font-medium text-white bg-violet-600 border border-violet-600 rounded-3xl">
+            {post.categoria}
+          </span>
+        </div>
+
+        <div className="flex justify-center px-4 py-8">
+          <div className="bg-white shadow-md rounded-lg p-6 w-1/3 mb-6 mr-6">
+            <img
+              src={post.imagem || "https://via.placeholder.com/300"} // Fallback para placeholder se não houver imagem
+              alt={post.titulo}
+              className="w-full h-auto object-cover rounded-md"
+            />
+          </div>
+          <div className="bg-white shadow-md rounded-lg p-6 w-1/3">
+            <p className="text-gray-700 font-medium">{post.descricao}</p>
+          </div>
+        </div>
+      </div>
+    </>
+  );
 }
 
 export default ViewPosts;

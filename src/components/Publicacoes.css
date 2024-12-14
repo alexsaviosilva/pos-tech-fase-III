@@ -1,0 +1,40 @@
+.publicacoes-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .publicacoes-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .publicacoes-table th, .publicacoes-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .publicacoes-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  .publicacao-imagem-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .publicacao-imagem {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 5px;
+  }
+  
+  .error {
+    color: red;
+    font-weight: bold;
+  }
+  

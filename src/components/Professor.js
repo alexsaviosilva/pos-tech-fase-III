@@ -5,8 +5,8 @@ import "./Professor.css";
 export default function Professor() {
   const navigate = useNavigate();
 
-  const handleNovaPublicacao = () => {
-    navigate("/nova-publicacao");
+  const handleNovapublicacoes = () => {
+    navigate("/nova-publicacoes");
   };
 
   return (
@@ -26,7 +26,7 @@ export default function Professor() {
         <div className="container-prof">
           <div className="principal-content">
             <h1>Publicações</h1>
-            <button onClick={handleNovaPublicacao}>Nova Publicação</button>
+            <button onClick={handleNovapublicacoes}>Nova Publicação</button>
           </div>
           <table className="tabela">
             <thead>
