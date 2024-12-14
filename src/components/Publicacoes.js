@@ -7,16 +7,16 @@ export default function Publicacoes() {
   const [filteredPublicacoes, setFilteredPublicacoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filterProfessor, setFilterProfessor] = useState("");
+  const [filterAutor, setFilterAutor] = useState(""); 
   const [filterMateria, setFilterMateria] = useState("");
-  const navigate = useNavigate(); // Hook para navegação
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPublicacoes = async () => {
       try {
         const response = await api.get("/publicacoes");
         setPublicacoes(response.data);
-        setFilteredPublicacoes(response.data);
+        setFilteredPublicacoes(response.data); 
       } catch (error) {
         console.error("Erro ao buscar publicações:", error);
         setError("Não foi possível carregar as publicações.");
@@ -30,22 +30,25 @@ export default function Publicacoes() {
 
   const handleFilter = () => {
     let filtered = [...publicacoes];
-    if (filterProfessor) {
+
+    if (filterAutor) {
       filtered = filtered.filter((pub) =>
-        pub.professor?.toLowerCase().includes(filterProfessor.toLowerCase())
+        pub.autor?.toLowerCase().includes(filterAutor.toLowerCase())
       );
     }
+
     if (filterMateria) {
       filtered = filtered.filter((pub) =>
         pub.categoria?.toLowerCase().includes(filterMateria.toLowerCase())
       );
     }
+
     setFilteredPublicacoes(filtered);
   };
 
   useEffect(() => {
     handleFilter();
-  }, [filterProfessor, filterMateria]);
+  }, [filterAutor, filterMateria]);
 
   if (loading) {
     return <p>Carregando publicações...</p>;
@@ -66,25 +69,23 @@ export default function Publicacoes() {
           Publicações
         </h2>
 
-        {/* Filtros */}
-        <div className="flex justify-between mb-6">
+        <div className="flex flex-col md:flex-row justify-between mb-6 space-y-4 md:space-y-0 md:space-x-4">
           <input
             type="text"
-            placeholder="Filtrar por professor"
-            value={filterProfessor}
-            onChange={(e) => setFilterProfessor(e.target.value)}
-            className="border border-gray-300 rounded-md px-4 py-2 w-1/2 mr-2"
+            placeholder="Filtrar por autor"
+            value={filterAutor}
+            onChange={(e) => setFilterAutor(e.target.value)}
+            className="border border-gray-300 rounded-md px-4 py-2 flex-1"
           />
           <input
             type="text"
             placeholder="Filtrar por matéria"
             value={filterMateria}
             onChange={(e) => setFilterMateria(e.target.value)}
-            className="border border-gray-300 rounded-md px-4 py-2 w-1/2"
+            className="border border-gray-300 rounded-md px-4 py-2 flex-1"
           />
         </div>
 
-        {/* Lista de publicações */}
         {filteredPublicacoes.length > 0 ? (
           <div className="space-y-4">
             {filteredPublicacoes.map((pub) => (
@@ -94,14 +95,17 @@ export default function Publicacoes() {
               >
                 <h3 className="text-lg font-bold">{pub.titulo}</h3>
                 <p className="text-sm text-gray-600">{pub.data}</p>
+                <p className="text-sm text-gray-600 italic">
+                  Autor: {pub.autor || "Desconhecido"}
+                </p>
                 <p className="text-gray-800">
                   {pub.descricao.length > 100
                     ? `${pub.descricao.substring(0, 100)}...`
                     : pub.descricao}
                 </p>
                 <button
-                  className="text-violet-600 font-semibold mt-2"
-                  onClick={() => navigate(`/publicacoes/${pub.id}`)} // Redireciona para a página de detalhes
+                  className="mt-2"
+                  onClick={() => navigate(`/publicacoes/${pub.id}`)}
                 >
                   Ler mais
                 </button>
