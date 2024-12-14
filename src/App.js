@@ -7,6 +7,7 @@ import Publicacoes from "./components/Publicacoes";
 import ListarAutores from "./components/ListarAutores";
 import CadastrarAutor from "./components/CadastrarAutor";
 import DetalhesAutor from "./components/DetalhesAutor";
+import ViewPosts from "./components/ViewPosts";
 
 export default function App() {
   return (
@@ -46,6 +47,8 @@ export default function App() {
             <Route path="/autores" element={<ListarAutores />} />
             <Route path="/cadastrar-autor" element={<CadastrarAutor />} />
             <Route path="/autores/:id" element={<DetalhesAutor />} />
+            <Route path="/publicacoes/:id" element={<ViewPosts />} />
+
             
             {/* Rota para página 404 */}
             <Route path="*" element={<h1>Página não encontrada (404)</h1>} />

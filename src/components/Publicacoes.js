@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 export default function Publicacoes() {
@@ -6,15 +7,16 @@ export default function Publicacoes() {
   const [filteredPublicacoes, setFilteredPublicacoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filterProfessor, setFilterProfessor] = useState(""); // Filtro por professor
-  const [filterMateria, setFilterMateria] = useState(""); // Filtro por matéria
+  const [filterProfessor, setFilterProfessor] = useState("");
+  const [filterMateria, setFilterMateria] = useState("");
+  const navigate = useNavigate(); // Hook para navegação
 
   useEffect(() => {
     const fetchPublicacoes = async () => {
       try {
         const response = await api.get("/publicacoes");
         setPublicacoes(response.data);
-        setFilteredPublicacoes(response.data); // Inicialmente exibe todas as publicações
+        setFilteredPublicacoes(response.data);
       } catch (error) {
         console.error("Erro ao buscar publicações:", error);
         setError("Não foi possível carregar as publicações.");
@@ -26,19 +28,21 @@ export default function Publicacoes() {
     fetchPublicacoes();
   }, []);
 
-  // Função para aplicar filtros
   const handleFilter = () => {
     let filtered = [...publicacoes];
     if (filterProfessor) {
-      filtered = filtered.filter((pub) => pub.professor?.toLowerCase().includes(filterProfessor.toLowerCase()));
+      filtered = filtered.filter((pub) =>
+        pub.professor?.toLowerCase().includes(filterProfessor.toLowerCase())
+      );
     }
     if (filterMateria) {
-      filtered = filtered.filter((pub) => pub.categoria?.toLowerCase().includes(filterMateria.toLowerCase()));
+      filtered = filtered.filter((pub) =>
+        pub.categoria?.toLowerCase().includes(filterMateria.toLowerCase())
+      );
     }
     setFilteredPublicacoes(filtered);
   };
 
-  // Executa o filtro automaticamente ao alterar os campos
   useEffect(() => {
     handleFilter();
   }, [filterProfessor, filterMateria]);
@@ -58,7 +62,9 @@ export default function Publicacoes() {
       </header>
 
       <div className="w-full max-w-4xl p-8">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">Publicações</h2>
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+          Publicações
+        </h2>
 
         {/* Filtros */}
         <div className="flex justify-between mb-6">
@@ -82,7 +88,10 @@ export default function Publicacoes() {
         {filteredPublicacoes.length > 0 ? (
           <div className="space-y-4">
             {filteredPublicacoes.map((pub) => (
-              <div key={pub.id} className="bg-white shadow-md rounded-lg p-4">
+              <div
+                key={pub.id}
+                className="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition"
+              >
                 <h3 className="text-lg font-bold">{pub.titulo}</h3>
                 <p className="text-sm text-gray-600">{pub.data}</p>
                 <p className="text-gray-800">
@@ -92,7 +101,7 @@ export default function Publicacoes() {
                 </p>
                 <button
                   className="text-violet-600 font-semibold mt-2"
-                  onClick={() => alert(`Descrição completa: ${pub.descricao}`)}
+                  onClick={() => navigate(`/publicacoes/${pub.id}`)} // Redireciona para a página de detalhes
                 >
                   Ler mais
                 </button>
@@ -100,7 +109,9 @@ export default function Publicacoes() {
             ))}
           </div>
         ) : (
-          <p className="text-center text-gray-600">Nenhuma publicação encontrada.</p>
+          <p className="text-center text-gray-600">
+            Nenhuma publicação encontrada.
+          </p>
         )}
       </div>
     </div>
