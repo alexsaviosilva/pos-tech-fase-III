@@ -8,6 +8,8 @@ function ViewPosts() {
   const [post, setPost] = React.useState(null);
   const [error, setError] = React.useState(null);
 
+  const userProfile = JSON.parse(localStorage.getItem("userProfile")) || { perfil: "aluno" }; 
+
   React.useEffect(() => {
     const fetchPost = async () => {
       try {
@@ -21,6 +23,21 @@ function ViewPosts() {
 
     fetchPost();
   }, [id]);
+
+  const handleDelete = async () => {
+    try {
+      await api.delete(`/publicacoes/${id}`);
+      alert("Publicação excluída com sucesso!");
+      navigate("/publicacoes"); 
+    } catch (err) {
+      console.error("Erro ao excluir publicação:", err);
+      alert("Erro ao excluir a publicação. Tente novamente.");
+    }
+  };
+
+  const handleEdit = () => {
+    navigate(`/publicacoes/editar/${id}`); 
+  };
 
   if (error) {
     return <p className="text-red-500 text-center">{error}</p>;
@@ -51,12 +68,29 @@ function ViewPosts() {
           </div>
           <p className="text-gray-800 text-base md:text-lg leading-relaxed">{post.descricao}</p>
         </div>
+
+        {userProfile.perfil === "professor" && (
+          <div className="flex justify-between gap-4 mt-6">
+            <button
+              className="px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition"
+              onClick={handleEdit}
+            >
+              Editar
+            </button>
+            <button
+              className="px-6 py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition"
+              onClick={handleDelete}
+            >
+              Excluir
+            </button>
+          </div>
+        )}
       </div>
 
-      <footer className="w-full bg-gray-800 py-4 fixed bottom-0 flex justify-center items-center">
+      <footer className="flex justify-center items-center mt-6">
         <button
           className="px-6 py-2 bg-violet-600 text-white font-semibold rounded-md hover:bg-violet-700 transition"
-          onClick={() => navigate(-1)} 
+          onClick={() => navigate(-1)}
         >
           Voltar
         </button>

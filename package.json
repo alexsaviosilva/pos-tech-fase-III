@@ -4,14 +4,21 @@
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
+    "assert": "^2.1.0",
     "axios": "^1.7.9",
     "axios-mock-adapter": "^2.1.0",
+    "buffer": "^6.0.3",
     "cra-template": "1.2.0",
+    "crypto-browserify": "^3.12.1",
+    "jsonwebtoken": "^9.0.2",
+    "process": "^0.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.28.0",
     "react-scripts": "5.0.1",
+    "stream-browserify": "^3.0.0",
     "styled-components": "^5.3.10",
+    "util": "^0.12.5",
     "web-vitals": "^4.2.4"
   },
   "scripts": {
@@ -39,10 +46,29 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "react-app-rewired": "^2.2.1"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.19.2"
+  },
+  "resolutions": {
+    "webpack": "^5.75.0"
+  },
+  "overrides": {
+    "react-scripts": {
+      "webpack": {
+        "resolve": {
+          "fallback": {
+            "buffer": "buffer",
+            "crypto": "crypto-browserify",
+            "stream": "stream-browserify",
+            "util": "util",
+            "process": "process"
+          }
+        }
+      }
+    }
   }
 }

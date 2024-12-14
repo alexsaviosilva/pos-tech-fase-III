@@ -1,13 +1,87 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import api from "../services/api";
 import "./Professor.css";
 
 export default function Professor() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [publicacoes, setPublicacoes] = useState([]);
+  const [error, setError] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false); 
 
-  const handleNovapublicacoes = () => {
+  useEffect(() => {
+    const fetchPublicacoes = async () => {
+      try {
+        const response = await api.get("/publicacoes");
+        setPublicacoes(response.data);
+      } catch (err) {
+        console.error("Erro ao buscar publicações:", err);
+        setError("Erro ao carregar as publicações.");
+      }
+    };
+
+    fetchPublicacoes();
+  }, []);
+
+  useEffect(() => {
+    if (location.state?.atualizou) {
+      const fetchPublicacoes = async () => {
+        try {
+          const response = await api.get("/publicacoes");
+          setPublicacoes(response.data);
+        } catch (err) {
+          console.error("Erro ao atualizar publicações:", err);
+        }
+      };
+
+      fetchPublicacoes();
+    }
+  }, [location.state]);
+
+  const handleNovaPublicacao = () => {
     navigate("/nova-publicacoes");
   };
+
+  const handleEditar = (id) => {
+    navigate(`/publicacoes/editar/${id}`);
+  };
+
+  const handleExcluir = async (id) => {
+    if (window.confirm("Tem certeza que deseja excluir esta publicação?")) {
+      try {
+        await api.delete(`/publicacoes/${id}`);
+        setPublicacoes(publicacoes.filter((pub) => pub.id !== id));
+        alert("Publicação excluída com sucesso!");
+      } catch (err) {
+        console.error("Erro ao excluir publicação:", err);
+        alert("Erro ao excluir a publicação. Tente novamente.");
+      }
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("userProfile");
+    alert("Você foi deslogado com sucesso.");
+    navigate("/");
+  };
+
+  const toggleMenu = () => {
+    setMenuOpen((prev) => !prev);
+  };
+
+  const closeMenu = (e) => {
+    if (!e.target.closest(".profile-menu")) {
+      setMenuOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("click", closeMenu);
+    return () => {
+      document.removeEventListener("click", closeMenu);
+    };
+  }, []);
 
   return (
     <>
@@ -17,45 +91,64 @@ export default function Professor() {
             <img src="/MB.jpg" alt="My Blog Logo" />
             <span>My Blog</span>
           </div>
-          <div className="logout">
+          <div className="profile-menu" onClick={toggleMenu}>
             <img src="/user.svg" alt="User Icon" />
             <span>Professor</span>
-            <img src="/logout.svg" alt="Logout Icon" />
+            {menuOpen && (
+              <div className="menu-dropdown">
+                <p onClick={handleLogout}>Sair</p>
+              </div>
+            )}
           </div>
         </div>
         <div className="container-prof">
           <div className="principal-content">
             <h1>Publicações</h1>
-            <button onClick={handleNovapublicacoes}>Nova Publicação</button>
+            <button onClick={handleNovaPublicacao} className="nova-publicacao-btn">
+              Nova Publicação
+            </button>
           </div>
-          <table className="tabela">
-            <thead>
-              <tr>
-                <th>Título</th>
-                <th>Descrição</th>
-                <th>Data de criação</th>
-                <th>Disciplina</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* vai ser trocado pela função de adicionar uma nova Publicação */}
-              <tr>
-                <td>A descoberta da matemática</td>
-                <td>Um post sobre a história da matemática e sua evolução até os dias de hoje</td>
-                <td>15/11/2024</td>
-                <td>matemática</td>
-              </tr>
-              <tr>
-                <td>Células eucariontes</td>
-                <td>
-                  Como o tipo desses organismos vivem e quais são suas
-                  características e formas de reprodução.
-                </td>
-                <td>21/11/2024</td>
-                <td>biologia</td>
-              </tr>
-            </tbody>
-          </table>
+          {error ? (
+            <p className="error-message">{error}</p>
+          ) : (
+            <table className="tabela">
+              <thead>
+                <tr>
+                  <th>Título</th>
+                  <th>Descrição</th>
+                  <th>Data de Criação</th>
+                  <th>Disciplina</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody>
+                {publicacoes.map((pub) => (
+                  <tr key={pub.id}>
+                    <td>{pub.titulo}</td>
+                    <td>{pub.descricao}</td>
+                    <td>{pub.data}</td>
+                    <td>{pub.categoria}</td>
+                    <td>
+                      <div className="acoes">
+                        <button
+                          className="editar-btn"
+                          onClick={() => handleEditar(pub.id)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="excluir-btn"
+                          onClick={() => handleExcluir(pub.id)}
+                        >
+                          Excluir
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </>

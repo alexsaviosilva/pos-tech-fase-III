@@ -5,6 +5,12 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import setupMocks from "./services/mock";
 
+import { Buffer } from "buffer";
+import process from "process";
+
+global.Buffer = Buffer;
+global.process = process;
+
 setupMocks();
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
