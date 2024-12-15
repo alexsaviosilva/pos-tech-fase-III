@@ -11,26 +11,44 @@ export default function Home() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(""); 
+    setError("");
 
     try {
       const response = await api.post("/auth/login", { email, password });
-      const { token, role } = response.data; 
+
+      // Verifique a resposta completa
+      console.log("Resposta completa da API:", response.data);
+
+      // Acesse o token e o role corretamente dentro de 'user'
+      const { token, user } = response.data;
+      const { role } = user; // Acessando 'role' dentro de 'user'
+
+      console.log("Role retornado:", role); // Verifique o valor de 'role'
+
+      if (!role) {
+        setError("Não foi possível determinar seu perfil. Contate o suporte.");
+        return;
+      }
 
       localStorage.setItem("authToken", token);
 
+      // Navegação conforme o role
       if (role === "professor") {
         navigate("/professor");
       } else if (role === "aluno") {
         navigate("/publicacoes");
       } else if (role === "admin") {
-        navigate("/admin"); 
+        navigate("/admin");
       } else {
         setError("Perfil desconhecido. Contate o suporte.");
       }
     } catch (err) {
       console.error("Erro ao fazer login:", err);
-      setError("Email ou senha incorretos. Tente novamente."); 
+      if (err.response) {
+        console.error("Status code:", err.response.status);
+        console.error("Detalhes do erro:", err.response.data);
+      }
+      setError("Email ou senha incorretos. Tente novamente.");
     }
   };
 
