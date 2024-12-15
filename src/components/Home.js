@@ -1,31 +1,36 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../services/api"; 
 import "./Home.css";
 
 export default function Home() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState(""); 
+  const [password, setPassword] = useState(""); 
+  const [error, setError] = useState(""); 
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(""); // Limpa mensagens de erro antes da requisição
+    setError(""); 
 
     try {
-      const response = await axios.post("/", { email, senha: password });
-      const { perfil } = response.data;
+      const response = await api.post("/auth/login", { email, password });
+      const { token, role } = response.data; 
 
-      // Redireciona para as páginas conforme o perfil do usuário
-      if (perfil === "professor") {
+      localStorage.setItem("authToken", token);
+
+      if (role === "professor") {
         navigate("/professor");
-      } else if (perfil === "aluno") {
+      } else if (role === "aluno") {
         navigate("/publicacoes");
+      } else if (role === "admin") {
+        navigate("/admin"); 
+      } else {
+        setError("Perfil desconhecido. Contate o suporte.");
       }
     } catch (err) {
-      // Exibe mensagem de erro caso as credenciais sejam inválidas
-      setError("Email ou senha incorretos. Tente novamente.");
+      console.error("Erro ao fazer login:", err);
+      setError("Email ou senha incorretos. Tente novamente."); 
     }
   };
 
@@ -33,16 +38,15 @@ export default function Home() {
     <div className="min-h-screen bg-purple-600 flex flex-col justify-center items-center">
       <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-md">
         <div className="flex flex-col items-center mb-6">
-          <img
-            src="/MB.jpg"
-            alt="logo"
-            className="w-20 h-20 mb-4"
-          />
+          <img src="/MB.jpg" alt="logo" className="w-20 h-20 mb-4" />
           <h1 className="text-2xl font-bold text-purple-600">MyBlog</h1>
         </div>
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Email*
             </label>
             <input
@@ -57,7 +61,10 @@ export default function Home() {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Password*
             </label>
             <input
@@ -79,7 +86,10 @@ export default function Home() {
                 name="rememberMe"
                 className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
               />
-              <label htmlFor="rememberMe" className="ml-2 text-sm text-gray-600">
+              <label
+                htmlFor="rememberMe"
+                className="ml-2 text-sm text-gray-600"
+              >
                 Remember me
               </label>
             </div>
@@ -87,9 +97,7 @@ export default function Home() {
               Forgot Password?
             </a>
           </div>
-          {error && (
-            <p className="text-red-500 text-sm mb-4">{error}</p>
-          )}
+          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
           <button
             type="submit"
             className="w-full bg-purple-600 text-white font-medium py-2 px-4 rounded-md hover:bg-purple-700 transition duration-200"

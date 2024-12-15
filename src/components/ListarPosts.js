@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import api from './api'; // Importa o arquivo de API configurado
+import api from './api';
 
 const ListarPosts = () => {
   const [posts, setPosts] = useState([]);
@@ -9,12 +9,12 @@ const ListarPosts = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await api.get('/posts'); // Endpoint da API
-        setPosts(response.data); // Atualiza o estado com os dados da API
+        const response = await api.get('/posts'); 
+        setPosts(response.data);
       } catch (error) {
         setError('Erro ao carregar os posts');
       } finally {
-        setLoading(false); // Finaliza o carregamento
+        setLoading(false); 
       }
     };
 

@@ -8,12 +8,21 @@ export default function Professor() {
   const location = useLocation();
   const [publicacoes, setPublicacoes] = useState([]);
   const [error, setError] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false); 
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchPublicacoes = async () => {
       try {
-        const response = await api.get("/publicacoes");
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          alert("Você precisa estar logado como professor para acessar esta página.");
+          navigate("/");
+          return;
+        }
+
+        const response = await api.get("/publicacoes", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setPublicacoes(response.data);
       } catch (err) {
         console.error("Erro ao buscar publicações:", err);
@@ -22,22 +31,7 @@ export default function Professor() {
     };
 
     fetchPublicacoes();
-  }, []);
-
-  useEffect(() => {
-    if (location.state?.atualizou) {
-      const fetchPublicacoes = async () => {
-        try {
-          const response = await api.get("/publicacoes");
-          setPublicacoes(response.data);
-        } catch (err) {
-          console.error("Erro ao atualizar publicações:", err);
-        }
-      };
-
-      fetchPublicacoes();
-    }
-  }, [location.state]);
+  }, [navigate]);
 
   const handleNovaPublicacao = () => {
     navigate("/nova-publicacoes");
@@ -48,9 +42,13 @@ export default function Professor() {
   };
 
   const handleExcluir = async (id) => {
+    const token = localStorage.getItem("authToken");
+
     if (window.confirm("Tem certeza que deseja excluir esta publicação?")) {
       try {
-        await api.delete(`/publicacoes/${id}`);
+        await api.delete(`/publicacoes/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setPublicacoes(publicacoes.filter((pub) => pub.id !== id));
         alert("Publicação excluída com sucesso!");
       } catch (err) {
@@ -61,7 +59,7 @@ export default function Professor() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("userProfile");
+    localStorage.removeItem("authToken");
     alert("Você foi deslogado com sucesso.");
     navigate("/");
   };
@@ -84,73 +82,71 @@ export default function Professor() {
   }, []);
 
   return (
-    <>
-      <div className="container-global-prof">
-        <div className="header">
-          <div className="logo-publica">
-            <img src="/MB.jpg" alt="My Blog Logo" />
-            <span>My Blog</span>
-          </div>
-          <div className="profile-menu" onClick={toggleMenu}>
-            <img src="/user.svg" alt="User Icon" />
-            <span>Professor</span>
-            {menuOpen && (
-              <div className="menu-dropdown">
-                <p onClick={handleLogout}>Sair</p>
-              </div>
-            )}
-          </div>
+    <div className="container-global-prof">
+      <div className="header">
+        <div className="logo-publica">
+          <img src="/MB.jpg" alt="My Blog Logo" />
+          <span>My Blog</span>
         </div>
-        <div className="container-prof">
-          <div className="principal-content">
-            <h1>Publicações</h1>
-            <button onClick={handleNovaPublicacao} className="nova-publicacao-btn">
-              Nova Publicação
-            </button>
-          </div>
-          {error ? (
-            <p className="error-message">{error}</p>
-          ) : (
-            <table className="tabela">
-              <thead>
-                <tr>
-                  <th>Título</th>
-                  <th>Descrição</th>
-                  <th>Data de Criação</th>
-                  <th>Disciplina</th>
-                  <th>Ação</th>
-                </tr>
-              </thead>
-              <tbody>
-                {publicacoes.map((pub) => (
-                  <tr key={pub.id}>
-                    <td>{pub.titulo}</td>
-                    <td>{pub.descricao}</td>
-                    <td>{pub.data}</td>
-                    <td>{pub.categoria}</td>
-                    <td>
-                      <div className="acoes">
-                        <button
-                          className="editar-btn"
-                          onClick={() => handleEditar(pub.id)}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          className="excluir-btn"
-                          onClick={() => handleExcluir(pub.id)}
-                        >
-                          Excluir
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="profile-menu" onClick={toggleMenu}>
+          <img src="/user.svg" alt="User Icon" />
+          <span>Professor</span>
+          {menuOpen && (
+            <div className="menu-dropdown">
+              <p onClick={handleLogout}>Sair</p>
+            </div>
           )}
         </div>
       </div>
-    </>
+      <div className="container-prof">
+        <div className="principal-content">
+          <h1>Publicações</h1>
+          <button onClick={handleNovaPublicacao} className="nova-publicacao-btn">
+            Nova Publicação
+          </button>
+        </div>
+        {error ? (
+          <p className="error-message">{error}</p>
+        ) : (
+          <table className="tabela">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Descrição</th>
+                <th>Data de Criação</th>
+                <th>Disciplina</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {publicacoes.map((pub) => (
+                <tr key={pub.id}>
+                  <td>{pub.titulo}</td>
+                  <td>{pub.descricao}</td>
+                  <td>{pub.data}</td>
+                  <td>{pub.categoria}</td>
+                  <td>
+                    <div className="acoes">
+                      <button
+                        className="editar-btn"
+                        onClick={() => handleEditar(pub.id)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="excluir-btn"
+                        onClick={() => handleExcluir(pub.id)}
+                      >
+                        Excluir
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
   );
 }
