@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api"; 
+import api from "../services/api";
 import "./Home.css";
 
 export default function Home() {
-  const [email, setEmail] = useState(""); 
-  const [password, setPassword] = useState(""); 
-  const [error, setError] = useState(""); 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -16,23 +16,20 @@ export default function Home() {
     try {
       const response = await api.post("/auth/login", { email, password });
 
-      // Verifique a resposta completa
+      // Log da resposta da API
       console.log("Resposta completa da API:", response.data);
 
-      // Acesse o token e o role corretamente dentro de 'user'
+      // Extrai token e dados do usuário
       const { token, user } = response.data;
-      const { role } = user; // Acessando 'role' dentro de 'user'
+      const { role, name } = user;
 
-      console.log("Role retornado:", role); // Verifique o valor de 'role'
-
-      if (!role) {
-        setError("Não foi possível determinar seu perfil. Contate o suporte.");
-        return;
-      }
-
+      // Salva token e usuário no localStorage
       localStorage.setItem("authToken", token);
+      localStorage.setItem("user", JSON.stringify(user)); // Salva o usuário completo
 
-      // Navegação conforme o role
+      console.log("Role retornado:", role); // Confirma o role
+
+      // Redirecionamento baseado no perfil (role)
       if (role === "professor") {
         navigate("/professor");
       } else if (role === "aluno") {
@@ -44,6 +41,8 @@ export default function Home() {
       }
     } catch (err) {
       console.error("Erro ao fazer login:", err);
+
+      // Tratamento de erros de resposta da API
       if (err.response) {
         console.error("Status code:", err.response.status);
         console.error("Detalhes do erro:", err.response.data);

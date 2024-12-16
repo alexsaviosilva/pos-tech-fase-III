@@ -1,22 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import Header from "../components/Header";
 
 export default function Publicacoes() {
   const [publicacoes, setPublicacoes] = useState([]);
   const [filteredPublicacoes, setFilteredPublicacoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filterAutor, setFilterAutor] = useState(""); 
+  const [filterAutor, setFilterAutor] = useState("");
   const [filterMateria, setFilterMateria] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPublicacoes = async () => {
       try {
-        const response = await api.get("/publicacoes");
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          navigate("/");
+          return;
+        }
+
+        const response = await api.get("/publicacoes", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
         setPublicacoes(response.data);
-        setFilteredPublicacoes(response.data); 
+        setFilteredPublicacoes(response.data);
       } catch (error) {
         console.error("Erro ao buscar publicações:", error);
         setError("Não foi possível carregar as publicações.");
@@ -26,7 +36,7 @@ export default function Publicacoes() {
     };
 
     fetchPublicacoes();
-  }, []);
+  }, [navigate]);
 
   const handleFilter = () => {
     let filtered = [...publicacoes];
@@ -60,15 +70,14 @@ export default function Publicacoes() {
 
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col items-center">
-      <header className="w-full bg-black text-white p-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold">Feed de Publicações</h1>
-      </header>
+      <Header /> {/* Reutiliza o Header com o nome do usuário logado */}
 
       <div className="w-full max-w-4xl p-8">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
-          Publicações
+          Feed de Publicações
         </h2>
 
+        {/* Filtros */}
         <div className="flex flex-col md:flex-row justify-between mb-6 space-y-4 md:space-y-0 md:space-x-4">
           <input
             type="text"
@@ -86,6 +95,7 @@ export default function Publicacoes() {
           />
         </div>
 
+        {/* Lista de Publicações */}
         {filteredPublicacoes.length > 0 ? (
           <div className="space-y-4">
             {filteredPublicacoes.map((pub) => (
@@ -104,7 +114,7 @@ export default function Publicacoes() {
                     : pub.descricao}
                 </p>
                 <button
-                  className="mt-2"
+                  className="mt-2 text-purple-600 hover:underline"
                   onClick={() => navigate(`/publicacoes/${pub.id}`)}
                 >
                   Ler mais

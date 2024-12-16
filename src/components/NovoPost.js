@@ -1,32 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import Header from "../components/Header"; 
 
 export default function NovoPost() {
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
   const [disciplina, setDisciplina] = useState("");
   const [imagem, setImagem] = useState(null);
-  const [autor, setAutor] = useState(""); 
-  const [autores, setAutores] = useState([]); 
+  const [autor, setAutor] = useState("");
+  const [autores, setAutores] = useState([]);
   const [message, setMessage] = useState(null);
+  const [userName, setUserName] = useState("Usuário");
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAutores = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        if (!token) {
-          alert("Você precisa estar logado.");
-          navigate("/");
-          return;
-        }
+        const user = JSON.parse(localStorage.getItem("user"));
+
+        if (user && user.name) setUserName(user.name);
 
         const response = await api.get("/autores", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        setAutores(response.data); 
+        setAutores(response.data);
       } catch (error) {
         console.error("Erro ao carregar autores:", error);
         setMessage("Erro ao carregar lista de autores.");
@@ -34,7 +34,7 @@ export default function NovoPost() {
     };
 
     fetchAutores();
-  }, [navigate]);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,26 +43,19 @@ export default function NovoPost() {
       titulo,
       descricao,
       categoria: disciplina,
-      autor, 
-      data: new Date().toISOString(), 
+      autor,
+      data: new Date().toISOString(),
       imagem: imagem ? imagem.name : "placeholder.png",
     };
 
     try {
       const token = localStorage.getItem("authToken");
-      if (!token) {
-        alert("Você precisa estar logado.");
-        navigate("/");
-        return;
-      }
 
-      const response = await api.post("/posts/publicacoes", novaPublicacao, {
+      await api.post("/posts/publicacoes", novaPublicacao, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("Publicação criada:", response.data);
       setMessage("Publicação criada com sucesso!");
-
       setTimeout(() => navigate("/professor"), 1500);
     } catch (error) {
       console.error("Erro ao criar publicação:", error);
@@ -70,21 +63,19 @@ export default function NovoPost() {
     }
   };
 
-  const handleVoltar = () => {
-    navigate("/professor");
+  const handleVoltar = () => navigate("/professor");
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
+    navigate("/");
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen flex flex-col items-center">
-      <header className="w-full bg-purple-600 text-white p-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold">Nova Publicação</h1>
-        <div className="flex items-center gap-2">
-          <img src="/profile.png" alt="Avatar" className="w-8 h-8 rounded-full" />
-          <span className="font-medium">Professor</span>
-        </div>
-      </header>
+    <div className="bg-gray-50 min-h-screen">
+      <Header name={userName} onLogout={handleLogout} />
 
-      <div className="w-full max-w-4xl bg-white shadow-md rounded-lg p-8 mt-6 mx-4">
+      <div className="container mx-auto p-8">
         <h2 className="text-2xl font-semibold mb-6 text-center">Nova Publicação</h2>
 
         {message && (
@@ -97,7 +88,7 @@ export default function NovoPost() {
           </p>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6">
           <div className="mb-4">
             <label htmlFor="titulo" className="block font-medium mb-2">
               Título
@@ -185,7 +176,7 @@ export default function NovoPost() {
             />
           </div>
 
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between">
             <button
               type="button"
               onClick={handleVoltar}

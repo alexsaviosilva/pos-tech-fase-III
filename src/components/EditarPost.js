@@ -1,37 +1,38 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
+import Header from "../components/Header"; 
 
 export default function EditarPost() {
-  const { id } = useParams(); // Pega o ID da URL
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  // Estados para o formulário
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
   const [disciplina, setDisciplina] = useState("");
   const [imagem, setImagem] = useState(null);
   const [message, setMessage] = useState("");
+  const [userName, setUserName] = useState("Usuário"); 
 
-  // Carregar os dados existentes do post ao montar o componente
   useEffect(() => {
     const fetchPost = async () => {
       try {
         const token = localStorage.getItem("authToken");
+        const user = JSON.parse(localStorage.getItem("user"));
 
         if (!token) {
           alert("Você precisa estar logado.");
-          navigate("/"); // Redireciona para o login
+          navigate("/");
           return;
         }
+
+        if (user && user.name) setUserName(user.name); 
 
         const response = await api.get(`/posts/publicacoes/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         const post = response.data;
-
-        // Preenche os estados com os dados do post
         setTitulo(post.titulo || "");
         setDescricao(post.descricao || "");
         setDisciplina(post.categoria || "");
@@ -44,7 +45,6 @@ export default function EditarPost() {
     fetchPost();
   }, [id, navigate]);
 
-  // Enviar as alterações
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -52,7 +52,7 @@ export default function EditarPost() {
       titulo,
       descricao,
       categoria: disciplina,
-      data: new Date().toISOString(), // Atualiza a data de modificação
+      data: new Date().toISOString(),
       imagem: imagem ? imagem.name : "imagem-placeholder.png",
     };
 
@@ -64,35 +64,28 @@ export default function EditarPost() {
       });
 
       setMessage("Publicação atualizada com sucesso!");
-      setTimeout(() => navigate("/professor"), 1500); // Redireciona após sucesso
+      setTimeout(() => navigate("/professor"), 1500);
     } catch (error) {
       console.error("Erro ao atualizar publicação:", error);
       setMessage("Erro ao atualizar publicação. Tente novamente.");
     }
   };
 
+  const handleVoltar = () => navigate("/professor");
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
+    navigate("/");
+  };
+
   return (
-    <div className="bg-gray-50 min-h-screen flex flex-col items-center">
-      {/* Header */}
-      <header className="w-full bg-black text-white p-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold">EDITAR PUBLICAÇÃO</h1>
-        <div className="flex items-center gap-4">
-          <span className="font-medium">Professor</span>
-          <img
-            src="/profile.png"
-            alt="Avatar"
-            className="w-8 h-8 rounded-full border border-gray-300"
-          />
-        </div>
-      </header>
+    <div className="bg-gray-50 min-h-screen">
+      <Header name={userName} onLogout={handleLogout} />
 
-      {/* Formulário */}
-      <div className="w-full max-w-4xl bg-white shadow-md rounded-lg p-8 mt-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
-          Editar Publicação
-        </h2>
+      <div className="container mx-auto p-8">
+        <h2 className="text-2xl font-semibold mb-6 text-center">Editar Publicação</h2>
 
-        {/* Exibe mensagem de sucesso/erro */}
         {message && (
           <p
             className={`text-center mb-4 font-semibold ${
@@ -103,8 +96,7 @@ export default function EditarPost() {
           </p>
         )}
 
-        {/* Formulário */}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6">
           <div className="mb-4">
             <label htmlFor="titulo" className="block text-gray-700 font-medium mb-2">
               Título
@@ -170,12 +162,21 @@ export default function EditarPost() {
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition"
-          >
-            Salvar Alterações
-          </button>
+          <div className="flex justify-between items-center">
+            <button
+              type="button"
+              onClick={handleVoltar}
+              className="bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition"
+            >
+              Voltar
+            </button>
+            <button
+              type="submit"
+              className="bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition"
+            >
+              Salvar Alterações
+            </button>
+          </div>
         </form>
       </div>
     </div>

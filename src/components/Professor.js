@@ -1,29 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import Header from "../components/Header";
 import "./Professor.css";
 
 export default function Professor() {
   const navigate = useNavigate();
   const [publicacoes, setPublicacoes] = useState([]);
   const [error, setError] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [userName, setUserName] = useState("");
 
-  // Função para formatar datas
-  const formatarData = (data) => {
-    if (!data) return "Data desconhecida";
-    return new Date(data).toLocaleDateString("pt-BR");
-  };
-
-  // Busca as publicações na API
+  // Carrega o nome do usuário e as publicações ao montar o componente
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user && user.name) setUserName(user.name);
+
     const fetchPublicacoes = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        console.log("Token JWT recuperado:", token);
-
         if (!token) {
-          alert("Você precisa estar logado como professor para acessar esta página.");
+          alert("Você precisa estar logado.");
           navigate("/");
           return;
         }
@@ -33,80 +29,65 @@ export default function Professor() {
         });
         setPublicacoes(response.data);
       } catch (err) {
-        console.error("Erro ao buscar publicações:", err.response?.data || err.message);
-        if (err.response?.status === 401) {
-          alert("Sessão expirada. Faça login novamente.");
-          handleLogout();
-        } else {
-          setError("Erro ao carregar as publicações.");
-        }
+        console.error("Erro ao buscar publicações:", err);
+        setError("Erro ao carregar as publicações.");
       }
     };
 
     fetchPublicacoes();
   }, [navigate]);
 
-  // Redireciona para criação de nova publicação
-  const handleNovaPublicacao = () => {
-    navigate("/nova-publicacao");
-  };
+  // Navega para a página de criação de nova publicação
+  const handleNovaPublicacao = () => navigate("/nova-publicacao");
 
-  // Redireciona para edição de publicação
-  const handleEditar = (id) => {
-    navigate(`/publicacoes/editar/${id}`);
-  };
+  // Navega para a página de edição com o ID da publicação
+  const handleEditar = (id) => navigate(`/publicacoes/editar/${id}`);
 
+  // Remove a publicação pelo ID
   const handleExcluir = async (id) => {
-    const token = localStorage.getItem("authToken");
-  
     if (window.confirm("Tem certeza que deseja excluir esta publicação?")) {
       try {
-        const response = await api.delete(`/posts/publicacoes/${id}`, {
+        const token = localStorage.getItem("authToken");
+        await api.delete(`/posts/publicacoes/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-  
-        if (response.status === 200) {
-          setPublicacoes((prev) => prev.filter((pub) => pub._id !== id));
-          alert("Publicação excluída com sucesso!");
-        }
+
+        setPublicacoes((prev) => prev.filter((pub) => pub._id !== id));
+        alert("Publicação excluída com sucesso!");
       } catch (err) {
-        console.error("Erro ao excluir publicação:", err.response?.data || err.message);
-        alert("Erro ao excluir a publicação. Verifique se ela ainda existe.");
+        console.error("Erro ao excluir publicação:", err);
+        alert("Erro ao excluir publicação. Tente novamente.");
       }
     }
   };
-  
 
+  // Realiza logout
   const handleLogout = () => {
     localStorage.removeItem("authToken");
-    alert("Você foi deslogado com sucesso.");
+    localStorage.removeItem("user");
     navigate("/");
   };
 
+  // Formata a data para o padrão brasileiro
+  const formatarData = (data) =>
+    data ? new Date(data).toLocaleDateString("pt-BR") : "Data desconhecida";
+
   return (
     <div className="container-global-prof">
-      <div className="header">
-        <div className="logo-publica">
-          <img src="/MB.jpg" alt="My Blog Logo" />
-          <span>My Blog</span>
-        </div>
-        <div className="profile-menu" onClick={() => setMenuOpen((prev) => !prev)}>
-          <img src="/user.svg" alt="User Icon" />
-          <span>Professor</span>
-          {menuOpen && (
-            <div className="menu-dropdown">
-              <p onClick={handleLogout}>Sair</p>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Header reutilizado */}
+      <Header name={userName} onLogout={handleLogout} />
+
       <div className="container-prof">
         <div className="principal-content">
           <h1>Publicações</h1>
-          <button onClick={handleNovaPublicacao} className="nova-publicacao-btn">
+          <button
+            onClick={handleNovaPublicacao}
+            className="nova-publicacao-btn"
+          >
             Nova Publicação
           </button>
         </div>
+
         {error ? (
           <p className="error-message">{error}</p>
         ) : (
@@ -127,12 +108,18 @@ export default function Professor() {
                     <td>{pub.titulo}</td>
                     <td>{pub.descricao}</td>
                     <td>{formatarData(pub.createdAt)}</td>
-                    <td>{pub.autor ? pub.autor.nome : "Autor desconhecido"}</td>
-                    <td>
-                      <button className="editar-btn" onClick={() => handleEditar(pub._id)}>
+                    <td>{pub.autor?.nome || "Autor desconhecido"}</td>
+                    <td className="acoes">
+                      <button
+                        className="editar-btn"
+                        onClick={() => handleEditar(pub._id)}
+                      >
                         Editar
                       </button>
-                      <button className="excluir-btn" onClick={() => handleExcluir(pub._id)}>
+                      <button
+                        className="excluir-btn"
+                        onClick={() => handleExcluir(pub._id)}
+                      >
                         Excluir
                       </button>
                     </td>
