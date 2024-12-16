@@ -2,17 +2,18 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import Header from "../components/Header";
+import "./ViewPosts.css"; // Importa o arquivo CSS
 
 function ViewPosts() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [error, setError] = useState(null);
-  const [userName, setUserName] = useState(""); 
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
-    if (user && user.name) setUserName(user.name); 
+    if (user && user.name) setUserName(user.name);
 
     const fetchPost = async () => {
       try {
@@ -42,57 +43,53 @@ function ViewPosts() {
   };
 
   if (error) {
-    return <p className="text-red-500 text-center mt-6">{error}</p>;
+    return <p className="error-message">{error}</p>;
   }
 
   if (!post) {
-    return <p className="text-center mt-6">Carregando publicação...</p>;
+    return <p className="loading-message">Carregando publicação...</p>;
   }
 
   return (
-    <div className="bg-gray-50 flex flex-col h-screen">
+    <div className="view-posts-container">
       <Header name={userName} onLogout={handleLogout} />
 
-      <div className="flex-1 overflow-y-auto px-4 py-8 w-full max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-6">{post.titulo || "Título não disponível"}</h1>
+      <div className="post-content">
+        <h1 className="post-title">{post.titulo || "Título não disponível"}</h1>
 
         <img
           src={post.imagem || "https://via.placeholder.com/1200x600"}
           alt={post.titulo || "Imagem não disponível"}
-          className="w-full h-auto max-h-[400px] object-cover rounded-lg mb-6"
+          className="post-image"
         />
 
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-          <p className="text-gray-600 text-sm">
+        <div className="post-details">
+          <p className="post-date">
             Data: {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : "Não disponível"}
           </p>
-          <span className="px-4 py-1 text-sm font-semibold text-white bg-violet-600 rounded-full">
+          <span className="post-category">
             {post.categoria || "Sem categoria"}
           </span>
         </div>
 
-        <p className="text-gray-800 text-lg leading-relaxed mb-4">
+        <p className="post-description">
           {post.descricao || "Nenhuma descrição fornecida para esta publicação."}
         </p>
 
         {post.autor && (
-          <div className="text-gray-600 text-sm">
+          <div className="post-author">
             <p>
-              Autor: <span className="font-semibold">{post.autor.nome || "Desconhecido"}</span>
+              Autor: <span className="author-name">{post.autor.nome || "Desconhecido"}</span>
             </p>
             <p>
-              Matéria:{" "}
-              <span className="font-semibold">{post.autor.materia || "Não especificada"}</span>
+              Matéria: <span className="author-materia">{post.autor.materia || "Não especificada"}</span>
             </p>
           </div>
         )}
       </div>
 
-      <footer className="w-full py-4 bg-white flex justify-center shadow-inner">
-        <button
-          className="px-4 py-2 bg-violet-600 text-white text-sm font-medium rounded-md hover:bg-violet-700 transition"
-          onClick={() => navigate("/publicacoes")}
-        >
+      <footer className="post-footer">
+        <button className="back-button" onClick={() => navigate("/publicacoes")}>
           Voltar
         </button>
       </footer>
