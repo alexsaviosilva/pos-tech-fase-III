@@ -1,85 +1,87 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import "./Professor.css";
 
 export default function Professor() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [publicacoes, setPublicacoes] = useState([]);
   const [error, setError] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Função para formatar datas
+  const formatarData = (data) => {
+    if (!data) return "Data desconhecida";
+    return new Date(data).toLocaleDateString("pt-BR");
+  };
+
+  // Busca as publicações na API
   useEffect(() => {
     const fetchPublicacoes = async () => {
       try {
         const token = localStorage.getItem("authToken");
+        console.log("Token JWT recuperado:", token);
+
         if (!token) {
           alert("Você precisa estar logado como professor para acessar esta página.");
           navigate("/");
           return;
         }
 
-        const response = await api.get("/publicacoes", {
+        const response = await api.get("/posts/publicacoes", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setPublicacoes(response.data);
       } catch (err) {
-        console.error("Erro ao buscar publicações:", err);
-        setError("Erro ao carregar as publicações.");
+        console.error("Erro ao buscar publicações:", err.response?.data || err.message);
+        if (err.response?.status === 401) {
+          alert("Sessão expirada. Faça login novamente.");
+          handleLogout();
+        } else {
+          setError("Erro ao carregar as publicações.");
+        }
       }
     };
 
     fetchPublicacoes();
   }, [navigate]);
 
+  // Redireciona para criação de nova publicação
   const handleNovaPublicacao = () => {
-    navigate("/nova-publicacoes");
+    navigate("/nova-publicacao");
   };
 
+  // Redireciona para edição de publicação
   const handleEditar = (id) => {
     navigate(`/publicacoes/editar/${id}`);
   };
 
   const handleExcluir = async (id) => {
     const token = localStorage.getItem("authToken");
-
+  
     if (window.confirm("Tem certeza que deseja excluir esta publicação?")) {
       try {
-        await api.delete(`/publicacoes/${id}`, {
+        const response = await api.delete(`/posts/publicacoes/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setPublicacoes(publicacoes.filter((pub) => pub.id !== id));
-        alert("Publicação excluída com sucesso!");
+  
+        if (response.status === 200) {
+          setPublicacoes((prev) => prev.filter((pub) => pub._id !== id));
+          alert("Publicação excluída com sucesso!");
+        }
       } catch (err) {
-        console.error("Erro ao excluir publicação:", err);
-        alert("Erro ao excluir a publicação. Tente novamente.");
+        console.error("Erro ao excluir publicação:", err.response?.data || err.message);
+        alert("Erro ao excluir a publicação. Verifique se ela ainda existe.");
       }
     }
   };
+  
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     alert("Você foi deslogado com sucesso.");
     navigate("/");
   };
-
-  const toggleMenu = () => {
-    setMenuOpen((prev) => !prev);
-  };
-
-  const closeMenu = (e) => {
-    if (!e.target.closest(".profile-menu")) {
-      setMenuOpen(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("click", closeMenu);
-    return () => {
-      document.removeEventListener("click", closeMenu);
-    };
-  }, []);
 
   return (
     <div className="container-global-prof">
@@ -88,7 +90,7 @@ export default function Professor() {
           <img src="/MB.jpg" alt="My Blog Logo" />
           <span>My Blog</span>
         </div>
-        <div className="profile-menu" onClick={toggleMenu}>
+        <div className="profile-menu" onClick={() => setMenuOpen((prev) => !prev)}>
           <img src="/user.svg" alt="User Icon" />
           <span>Professor</span>
           {menuOpen && (
@@ -114,35 +116,35 @@ export default function Professor() {
                 <th>Título</th>
                 <th>Descrição</th>
                 <th>Data de Criação</th>
-                <th>Disciplina</th>
+                <th>Autor</th>
                 <th>Ação</th>
               </tr>
             </thead>
             <tbody>
-              {publicacoes.map((pub) => (
-                <tr key={pub.id}>
-                  <td>{pub.titulo}</td>
-                  <td>{pub.descricao}</td>
-                  <td>{pub.data}</td>
-                  <td>{pub.categoria}</td>
-                  <td>
-                    <div className="acoes">
-                      <button
-                        className="editar-btn"
-                        onClick={() => handleEditar(pub.id)}
-                      >
+              {publicacoes.length > 0 ? (
+                publicacoes.map((pub) => (
+                  <tr key={pub._id}>
+                    <td>{pub.titulo}</td>
+                    <td>{pub.descricao}</td>
+                    <td>{formatarData(pub.createdAt)}</td>
+                    <td>{pub.autor ? pub.autor.nome : "Autor desconhecido"}</td>
+                    <td>
+                      <button className="editar-btn" onClick={() => handleEditar(pub._id)}>
                         Editar
                       </button>
-                      <button
-                        className="excluir-btn"
-                        onClick={() => handleExcluir(pub.id)}
-                      >
+                      <button className="excluir-btn" onClick={() => handleExcluir(pub._id)}>
                         Excluir
                       </button>
-                    </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: "center" }}>
+                    Nenhuma publicação encontrada.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         )}

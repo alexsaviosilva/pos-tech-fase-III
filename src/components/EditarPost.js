@@ -3,23 +3,38 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 export default function EditarPost() {
-  const { id } = useParams(); // ID da publicação passada pela URL
+  const { id } = useParams(); // Pega o ID da URL
   const navigate = useNavigate();
 
+  // Estados para o formulário
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
   const [disciplina, setDisciplina] = useState("");
   const [imagem, setImagem] = useState(null);
-  const [message, setMessage] = useState(null);
+  const [message, setMessage] = useState("");
 
+  // Carregar os dados existentes do post ao montar o componente
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await api.get(`/publicacoes/${id}`);
+        const token = localStorage.getItem("authToken");
+
+        if (!token) {
+          alert("Você precisa estar logado.");
+          navigate("/"); // Redireciona para o login
+          return;
+        }
+
+        const response = await api.get(`/posts/publicacoes/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
         const post = response.data;
-        setTitulo(post.titulo);
-        setDescricao(post.descricao);
-        setDisciplina(post.categoria);
+
+        // Preenche os estados com os dados do post
+        setTitulo(post.titulo || "");
+        setDescricao(post.descricao || "");
+        setDisciplina(post.categoria || "");
       } catch (error) {
         console.error("Erro ao carregar publicação:", error);
         setMessage("Erro ao carregar a publicação para edição.");
@@ -27,8 +42,9 @@ export default function EditarPost() {
     };
 
     fetchPost();
-  }, [id]);
+  }, [id, navigate]);
 
+  // Enviar as alterações
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -36,25 +52,31 @@ export default function EditarPost() {
       titulo,
       descricao,
       categoria: disciplina,
-      data: new Date().toLocaleDateString("pt-BR"), // Mantém a data atualizada
-      imagem: imagem ? imagem.name : "placeholder-image.png",
+      data: new Date().toISOString(), // Atualiza a data de modificação
+      imagem: imagem ? imagem.name : "imagem-placeholder.png",
     };
 
     try {
-      await api.put(`/publicacoes/${id}`, updatedPost); // Atualiza publicação no backend
+      const token = localStorage.getItem("authToken");
+
+      await api.put(`/posts/publicacoes/${id}`, updatedPost, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       setMessage("Publicação atualizada com sucesso!");
-      navigate("/professor", { state: { atualizou: true } }); // Redireciona para a tela do professor
+      setTimeout(() => navigate("/professor"), 1500); // Redireciona após sucesso
     } catch (error) {
       console.error("Erro ao atualizar publicação:", error);
-      setMessage("Erro ao atualizar publicação. Verifique se o servidor está configurado corretamente.");
+      setMessage("Erro ao atualizar publicação. Tente novamente.");
     }
   };
 
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col items-center">
-      <header className="w-full bg-black text-white p-4 flex flex-wrap justify-between items-center">
-        <h1 className="text-xl font-bold">EDIT POST</h1>
-        <div className="flex items-center gap-4 mt-2 md:mt-0">
+      {/* Header */}
+      <header className="w-full bg-black text-white p-4 flex justify-between items-center">
+        <h1 className="text-xl font-bold">EDITAR PUBLICAÇÃO</h1>
+        <div className="flex items-center gap-4">
           <span className="font-medium">Professor</span>
           <img
             src="/profile.png"
@@ -64,19 +86,24 @@ export default function EditarPost() {
         </div>
       </header>
 
-      <div className="w-full max-w-4xl bg-white shadow-md rounded-lg p-8 mt-6 mx-4 md:mx-auto">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center md:text-left">
-          Editar publicação
+      {/* Formulário */}
+      <div className="w-full max-w-4xl bg-white shadow-md rounded-lg p-8 mt-6">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+          Editar Publicação
         </h2>
+
+        {/* Exibe mensagem de sucesso/erro */}
         {message && (
           <p
-            className={`text-center font-semibold ${
+            className={`text-center mb-4 font-semibold ${
               message.includes("sucesso") ? "text-green-500" : "text-red-500"
             }`}
           >
             {message}
           </p>
         )}
+
+        {/* Formulário */}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="titulo" className="block text-gray-700 font-medium mb-2">
@@ -85,7 +112,6 @@ export default function EditarPost() {
             <input
               type="text"
               id="titulo"
-              name="titulo"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               placeholder="Digite o título"
@@ -100,7 +126,6 @@ export default function EditarPost() {
             </label>
             <textarea
               id="descricao"
-              name="descricao"
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               placeholder="Digite a descrição"
@@ -116,7 +141,6 @@ export default function EditarPost() {
             </label>
             <select
               id="disciplina"
-              name="disciplina"
               value={disciplina}
               onChange={(e) => setDisciplina(e.target.value)}
               className="w-full border border-gray-300 rounded-md px-4 py-2"
@@ -140,10 +164,9 @@ export default function EditarPost() {
             <input
               type="file"
               id="imagem"
-              name="imagem"
               accept="image/*"
               onChange={(e) => setImagem(e.target.files[0])}
-              className="border border-gray-300 rounded-md px-4 py-2 w-full md:w-auto"
+              className="w-full border border-gray-300 rounded-md px-4 py-2"
             />
           </div>
 
