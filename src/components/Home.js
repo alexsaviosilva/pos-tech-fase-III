@@ -16,20 +16,16 @@ export default function Home() {
     try {
       const response = await api.post("/auth/login", { email, password });
 
-      // Log da resposta da API
       console.log("Resposta completa da API:", response.data);
 
-      // Extrai token e dados do usuário
       const { token, user } = response.data;
       const { role, name } = user;
 
-      // Salva token e usuário no localStorage
       localStorage.setItem("authToken", token);
-      localStorage.setItem("user", JSON.stringify(user)); // Salva o usuário completo
+      localStorage.setItem("user", JSON.stringify(user)); 
 
-      console.log("Role retornado:", role); // Confirma o role
+      console.log("Role retornado:", role); 
 
-      // Redirecionamento baseado no perfil (role)
       if (role === "professor") {
         navigate("/professor");
       } else if (role === "aluno") {
@@ -42,7 +38,6 @@ export default function Home() {
     } catch (err) {
       console.error("Erro ao fazer login:", err);
 
-      // Tratamento de erros de resposta da API
       if (err.response) {
         console.error("Status code:", err.response.status);
         console.error("Detalhes do erro:", err.response.data);

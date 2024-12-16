@@ -10,9 +10,13 @@ export default function Publicacoes() {
   const [error, setError] = useState(null);
   const [filterAutor, setFilterAutor] = useState("");
   const [filterMateria, setFilterMateria] = useState("");
+  const [userName, setUserName] = useState(""); 
   const navigate = useNavigate();
 
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user && user.name) setUserName(user.name); 
+
     const fetchPublicacoes = async () => {
       try {
         const token = localStorage.getItem("authToken");
@@ -43,6 +47,12 @@ export default function Publicacoes() {
     fetchPublicacoes();
   }, [navigate]);
 
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
+    navigate("/");
+  };
+
   const handleFilter = () => {
     let filtered = [...publicacoes];
 
@@ -70,15 +80,13 @@ export default function Publicacoes() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-      <Header />
+      <Header name={userName} onLogout={handleLogout} />
 
-      {/* Conteúdo com Scroll */}
       <div className="flex-1 overflow-y-auto px-4 py-4">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center w-full">
           Feed de Publicações
         </h2>
 
-        {/* Filtros */}
         <div className="flex flex-col md:flex-row justify-between w-full max-w-4xl mx-auto mb-6 space-y-4 md:space-y-0 md:space-x-4">
           <input
             type="text"
@@ -96,7 +104,6 @@ export default function Publicacoes() {
           />
         </div>
 
-        {/* Lista de Publicações */}
         <div className="flex flex-col items-center w-full max-w-4xl mx-auto space-y-4">
           {filteredPublicacoes.map((pub) => (
             <div
@@ -119,7 +126,7 @@ export default function Publicacoes() {
                   : "Descrição não disponível"}
               </p>
               <button
-                className="mt-2 text-purple-600 hover:underline"
+                className="mt-2  hover:underline"
                 onClick={() => navigate(`/posts/publicacoes/${pub._id}`)}
               >
                 Ler mais
