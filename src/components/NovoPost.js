@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
@@ -7,18 +7,44 @@ export default function NovoPost() {
   const [descricao, setDescricao] = useState("");
   const [disciplina, setDisciplina] = useState("");
   const [imagem, setImagem] = useState(null);
+  const [autor, setAutor] = useState(""); 
+  const [autores, setAutores] = useState([]); 
   const [message, setMessage] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchAutores = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          alert("Você precisa estar logado.");
+          navigate("/");
+          return;
+        }
+
+        const response = await api.get("/autores", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setAutores(response.data); 
+      } catch (error) {
+        console.error("Erro ao carregar autores:", error);
+        setMessage("Erro ao carregar lista de autores.");
+      }
+    };
+
+    fetchAutores();
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Estrutura do payload
     const novaPublicacao = {
       titulo,
       descricao,
       categoria: disciplina,
-      data: new Date().toISOString(), // Data no formato ISO
+      autor, 
+      data: new Date().toISOString(), 
       imagem: imagem ? imagem.name : "placeholder.png",
     };
 
@@ -30,7 +56,6 @@ export default function NovoPost() {
         return;
       }
 
-      // Envia os dados para a API
       const response = await api.post("/posts/publicacoes", novaPublicacao, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -38,7 +63,6 @@ export default function NovoPost() {
       console.log("Publicação criada:", response.data);
       setMessage("Publicação criada com sucesso!");
 
-      // Redireciona após sucesso
       setTimeout(() => navigate("/professor"), 1500);
     } catch (error) {
       console.error("Erro ao criar publicação:", error);
@@ -123,6 +147,28 @@ export default function NovoPost() {
               <option value="Ciências">Ciências</option>
               <option value="Português">Português</option>
               <option value="Geografia">Geografia</option>
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="autor" className="block font-medium mb-2">
+              Autor
+            </label>
+            <select
+              id="autor"
+              value={autor}
+              onChange={(e) => setAutor(e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-4 py-2"
+              required
+            >
+              <option value="" disabled>
+                Selecione um autor
+              </option>
+              {autores.map((autorItem) => (
+                <option key={autorItem._id} value={autorItem._id}>
+                  {autorItem.nome}
+                </option>
+              ))}
             </select>
           </div>
 
