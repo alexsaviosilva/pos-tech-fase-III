@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
-import Header from "../components/Header";
-import "./Professor.css";
+import Header from "../components/Header"; 
+import "./Professor.css"; 
 
 export default function Professor() {
   const navigate = useNavigate();
@@ -57,34 +57,25 @@ export default function Professor() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
-    navigate("/");
-  };
-
   const formatarData = (data) =>
     data ? new Date(data).toLocaleDateString("pt-BR") : "Data desconhecida";
 
   return (
-    <div className="container-global-prof">
-      <Header name={userName} onLogout={handleLogout} />
+    <div className="professor-container">
+      <Header name={userName} onLogout={() => navigate("/")} />
 
-      <div className="container-prof">
+      <div className="publicacoes-container">
         <div className="principal-content">
           <h1>Publicações</h1>
-          <button
-            onClick={handleNovaPublicacao}
-            className="nova-publicacao-btn"
-          >
+          <button onClick={handleNovaPublicacao} className="nova-publicacao-btn">
             Nova Publicação
           </button>
         </div>
 
         {error ? (
-          <p className="error-message">{error}</p>
+          <p className="error">{error}</p>
         ) : (
-          <table className="tabela">
+          <table className="publicacoes-table">
             <thead>
               <tr>
                 <th>Título</th>
@@ -103,16 +94,10 @@ export default function Professor() {
                     <td>{formatarData(pub.createdAt)}</td>
                     <td>{pub.autor?.nome || "Autor desconhecido"}</td>
                     <td className="acoes">
-                      <button
-                        className="editar-btn"
-                        onClick={() => handleEditar(pub._id)}
-                      >
+                      <button className="editar-btn" onClick={() => handleEditar(pub._id)}>
                         Editar
                       </button>
-                      <button
-                        className="excluir-btn"
-                        onClick={() => handleExcluir(pub._id)}
-                      >
+                      <button className="excluir-btn" onClick={() => handleExcluir(pub._id)}>
                         Excluir
                       </button>
                     </td>
@@ -120,7 +105,7 @@ export default function Professor() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: "center" }}>
+                  <td colSpan="5" className="text-center">
                     Nenhuma publicação encontrada.
                   </td>
                 </tr>

@@ -1,45 +1,15 @@
-.container-global-prof {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    background-color: #f9f9f9;
-  }
-  
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #4f46e5;
-    color: white;
-    padding: 10px 20px;
-  }
-  
-  .logo-publica {
-    display: flex;
-    gap: 10px;
-    width: 150px;
-    align-items: center;
-  }
-  
-.logo-publica img{
-    border-radius: 4px;
-    width: 42px;
-    height: 42px;
-  }
-  
-  .logout {
-    display: flex;
-    align-items: center;
-  }
-  
-  .logout img {
-    height: 25px;
-    margin-left: 10px;
-  }
-  
-  .container-prof {
-    flex: 1;
-    padding: 20px;
+
+.professor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden; 
+}
+
+.publicacoes-container {
+  flex: 1;
+  overflow-y: auto; 
+  padding: 20px;
   }
   
   .principal-content {
@@ -47,154 +17,85 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-  }
-  
-  .nova-publicacao-btn {
-    background-color: #4f46e5;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+}
+
+.nova-publicacao-btn {
+  background-color: #4f46e5;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
     width: auto; 
     max-width: 200px; 
     text-align: center; 
-  }
-  
-  .nova-publicacao-btn:hover {
-    background-color: #3b3ba3;
-  }
-  
-  
-  .tabela {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-  }
-  
-  .tabela th,
-  .tabela td {
-    padding: 10px 15px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  .tabela th {
-    background-color: #f3f4f6;
-    font-weight: bold;
-  }
-  
-  .acoes {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .editar-btn,
-  .excluir-btn {
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s;
-  }
-  
-  .editar-btn {
-    background-color: #4caf50;
-    color: white;
-  }
-  
-  .editar-btn:hover {
-    background-color: #388e3c;
-  }
-  
-  .excluir-btn {
-    background-color: #f44336;
-    color: white;
-  }
-  
-  .excluir-btn:hover {
-    background-color: #d32f2f;
-  }
-  
-  @media (max-width: 768px) {
-    .tabela th,
-    .tabela td {
-      font-size: 12px;
-      padding: 8px;
-    }
-  
-    .nova-publicacao-btn {
-      font-size: 12px;
-      padding: 8px 15px;
-    }
-  
-    .acoes {
-      flex-direction: column;
-      gap: 5px;
-    }
-  
-    .editar-btn,
-    .excluir-btn {
-      font-size: 12px;
-      padding: 5px;
-    }
-    .logout-btn {
-        background-color: #f44336;
-        color: white;
-        padding: 5px 10px;
-        border: none;
-        border-radius: 4px;
-        font-size: 14px;
-        cursor: pointer;
-        margin-left: 10px;
-        transition: background-color 0.3s;
-      }
-      
-      .logout-btn:hover {
-        background-color: #d32f2f;
-      }
-      .profile-menu {
-        position: relative;
-        display: inline-block;
-        cursor: pointer;
-        color: white;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-      }
-      
-      .menu-dropdown {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        background-color: white;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        padding: 10px;
-        z-index: 10;
-        width: 100px;
-      }
-      
-      .menu-dropdown p {
-        margin: 0;
-        padding: 8px 12px;
-        font-size: 14px;
-        color: black;
-        cursor: pointer;
-        text-align: center;
-      }
-      
-      .menu-dropdown p:hover {
-        background-color: #f5f5f5;
-        color: #333;
-      }
-      
-  }
-  
+}
+
+.nova-publicacao-btn:hover {
+  background-color: #3b3ba3;
+}
+
+
+.publicacoes-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.publicacoes-table th,
+.publicacoes-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.publicacoes-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+  text-align: center;
+}
+
+
+.acoes {
+  display: flex;
+  gap: 10px;
+}
+
+.editar-btn,
+.excluir-btn {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  color: white;
+  transition: background-color 0.3s;
+}
+
+.editar-btn {
+  background-color: #4caf50;
+}
+
+.editar-btn:hover {
+  background-color: #388e3c;
+}
+
+.excluir-btn {
+  background-color: #f44336;
+}
+
+.excluir-btn:hover {
+  background-color: #d32f2f;
+}
+
+
+.text-center {
+  text-align: center;
+}
