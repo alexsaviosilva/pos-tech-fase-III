@@ -19,7 +19,7 @@ export default function App() {
             <Route path="/professor" element={<Professor />} />
             <Route path="/publicacoes/editar/:id" element={<EditarPost />} /> 
             <Route path="/publicacoes" element={<Publicacoes />} />
-            <Route path="/publicacoes/:id" element={<ViewPosts />} />
+            <Route path="/posts/publicacoes/:id" element={<ViewPosts />} />
 
             <Route path="*" element={<h1>Página não encontrada (404)</h1>} />
           </Routes>
