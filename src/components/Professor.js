@@ -10,7 +10,6 @@ export default function Professor() {
   const [error, setError] = useState(null);
   const [userName, setUserName] = useState("");
 
-  // Carrega o nome do usuário e as publicações ao montar o componente
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user && user.name) setUserName(user.name);
@@ -37,13 +36,10 @@ export default function Professor() {
     fetchPublicacoes();
   }, [navigate]);
 
-  // Navega para a página de criação de nova publicação
   const handleNovaPublicacao = () => navigate("/nova-publicacao");
 
-  // Navega para a página de edição com o ID da publicação
   const handleEditar = (id) => navigate(`/publicacoes/editar/${id}`);
 
-  // Remove a publicação pelo ID
   const handleExcluir = async (id) => {
     if (window.confirm("Tem certeza que deseja excluir esta publicação?")) {
       try {
@@ -61,20 +57,17 @@ export default function Professor() {
     }
   };
 
-  // Realiza logout
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
     navigate("/");
   };
 
-  // Formata a data para o padrão brasileiro
   const formatarData = (data) =>
     data ? new Date(data).toLocaleDateString("pt-BR") : "Data desconhecida";
 
   return (
     <div className="container-global-prof">
-      {/* Header reutilizado */}
       <Header name={userName} onLogout={handleLogout} />
 
       <div className="container-prof">
